@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sentinel2 download</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<script>
+ $(document).ready(function(){
+   // Check or Uncheck All checkboxes
+   $("#checkall").change(function(){
+     var checked = $(this).is(':checked');
+     if(checked){
+       $(".checkbox").each(function(){
+         $(this).prop("checked",true);
+       });
+     }else{
+       $(".checkbox").each(function(){
+         $(this).prop("checked",false);
+       });
+     }
+   });
+ 
+  // Changing state of CheckAll checkbox 
+  $(".checkbox").click(function(){
+ 
+    if($(".checkbox").length == $(".checkbox:checked").length) {
+      $("#checkall").prop("checked", true);
+    } else {
+      $("#checkall").removeAttr("checked");
+    }
+
+  });
+});
+</script>
+<body>
+    <form method='POST' action={{ '/process' if type == 2 else "" }}>
+		{% if type == 1 %}
+			{% for file in projs%}
+			<input type="radio" name="selected" value="{{ file }}" onclick="this.form.submit()"> {{ file }}<br>
+			{% endfor %}
+		{% elif type == 2 %}
+			<fieldset>
+			<p><input type="checkbox" name="all" id='checkall' class="selectall" />Check All</br></p>
+			{% for file in projs%}
+			<input class='checkbox' type="checkbox" name="{{ file }}" value="{{ file }}"> {{ file }}<br>
+			{% endfor %}
+			</fieldset>
+			<hr>
+			<fieldset>
+			<input type="checkbox" name="toTiff" value="toTiff" checked> Should be processed to geotif image?<br>
+			</fieldset>
+			<hr>
+			<fieldset>
+			<div>You need to visit <a href="/download">downloads</a> to retrieve the products. This page will not refresh and once the "Send!" button is pressed, you can close the window and... wait</div>
+			</fieldset>
+		{% endif %}
+        {{ "<input type='submit' name='submit', value='Send!'></input>"|safe if type == 2 else '' }}
+    </form>
+</body>
+</html>

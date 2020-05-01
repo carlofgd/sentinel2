@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Sentinel2 download</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+</head>
+<body>
+    <form method='POST'>
+        <fieldset>
+            <legend> Coordinates information (positive/negative decimal degrees, try to use a very small box):</legend>
+            <label for="north">North: </label>
+            <input type='number' name='north' id='north' value="-17" min="-90", max="90" step="0.01" required>
+            <label for="east">East: </label>
+            <input type='number' name='east' id='east' value="-74" min="-180", max="180" step="0.01" required>
+            <label for="south">South: </label>
+            <input type='number' name='south' id='south' value="-20" min="-90", max="90" step="0.01" required>
+            <label for="west">West: </label>
+            <input type='number' name='west' id='west' value="-70" min="-180", max="180" step="0.01" required>
+        </fieldset>
+        <fieldset>
+            <legend> Date: </legend>
+            <label for="start_date">Starting date: </label>
+            <input type='date' name='start_date' id='start_date' required>
+            <label for="end_date">Ending date: </label>
+            <input type='date' name='end_date' id='end_date' required>
+        </fieldset>
+        <fieldset>
+            <legend> Sentinel2 specifications: </legend>
+            <label for="tiles">Tiles (comma separated if many): </label>
+            <input type='text' name='tiles' id='tiles' placeholder="19KCV,19KCU">
+            <label for="max_cloud">Maximum cloud cover (0 to 100)%: </label>
+            <input type='number' name='max_cloud' id='max_cloud' value="20", min="0", max="99" required>
+            <label for="project">Project (a name to assign the project): </label>
+            <input type='text' name='project' id='project' value="Iquique" required> </br>
+			<a href="https://sentinel.esa.int/documents/247904/1955685/S2A_OPER_GIP_TILPAR_MPC__20151209T095117_V20150622T000000_21000101T000000_B00.kml">Sentinel2 KMZ grid</a>
+        </fieldset>
+        <input type='submit' name='submit', value='Send!'></input>
+    </form>
+	
+	<a href="/projects"> Available Proyects</a>
+	<a href="/download"> Available Downloads</a>
+
+</body>
+</html>
