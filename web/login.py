@@ -36,7 +36,7 @@ def request_loader(request):
 
 @login_manager.unauthorized_handler
 def unauthorized_handler():
-    return '<meta http-equiv="refresh" content="3;url=/login"/>Unauthorized access. Redirecting to login in 3 seconds'
+    return '<meta http-equiv="refresh" content="3;url=/login"/>Error de acceso. Volviendo al login en 3 segundos...'
 
 
 def login():
@@ -55,9 +55,9 @@ def login():
 
 def logout():
     flask_login.logout_user()
-    return '<meta http-equiv="refresh" content="3;url=/"/>Logged out, redirecting to root'
+    return '<meta http-equiv="refresh" content="3;url=/"/>Hasta pronto! Volviendo al login...'
 
 
 @flask_login.login_required
 def protected():
-    return '<meta http-equiv="refresh" content="3;url=/"/>Logged in as: ' + flask_login.current_user.id + '<p>Redirecting in 3 seconds....</p>'
+    return '<meta http-equiv="refresh" content="3;url=/"/>Loggeado como: ' + flask_login.current_user.id + '<p>Accediendo en 3 segundos....</p>'
