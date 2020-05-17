@@ -34,28 +34,28 @@
 });
 </script>
 <body>
-    <form method='POST' action={{ '/process' if type == 2 else "" }}>
-		{% if type == 1 %}
-			{% for file in projs%}
-			<input type="radio" name="selected" value="{{ file }}" onclick="this.form.submit()"> {{ file }}<br>
-			{% endfor %}
-		{% elif type == 2 %}
-			<fieldset>
-			<p><input type="checkbox" name="all" id='checkall' class="selectall" />Check All</br></p>
-			{% for file in projs%}
-			<input class='checkbox' type="checkbox" name="{{ file }}" value="{{ file }}"> {{ file }}<br>
-			{% endfor %}
-			</fieldset>
-			<hr>
-			<fieldset>
-			<input type="checkbox" name="toTiff" value="toTiff" checked> Should be processed to geotif image?<br>
-			</fieldset>
-			<hr>
-			<fieldset>
-			<div>You need to visit <a href="/download">downloads</a> to retrieve the products. This page will not refresh and once the "Send!" button is pressed, you can close the window and... wait</div>
-			</fieldset>
-		{% endif %}
-        {{ "<input type='submit' name='submit', value='Send!'></input>"|safe if type == 2 else '' }}
+    <form method='post' action={{ '/process' if type == 2 else "" }}>
+    {% if type == 1 %}
+      {% for file in projs%}
+      <input type="radio" name="selected" value="{{ file }}" onclick="this.form.submit()"> {{ file }}<br>
+      {% endfor %}
+    {% elif type == 2 %}
+      <fieldset>
+      <p><input type="checkbox" name="all" id='checkall' class="selectall" />Seleccionar todos</br></p>
+      {% for file in projs%}
+      <input class='checkbox' type="checkbox" name="{{ file }}" value="{{ file }}"> {{ file }}<br>
+      {% endfor %}
+      </fieldset>
+      <hr>
+      <fieldset>
+      <input type="checkbox" name="toTiff" value="toTiff" checked> ¿Procesar a Gtiff?<br>
+      </fieldset>
+      <hr>
+      <fieldset>
+      <div>Vaya a <a href="/download">descargas</a> para obtener los productos. Al presionar "enviar" puede cerrar la ventana.</div>
+      </fieldset>
+    {% endif %}
+        {{ "<input type='submit' name='submit', value='enviar'></input>"|safe if type == 2 else '' }}
     </form>
 </body>
 </html>
