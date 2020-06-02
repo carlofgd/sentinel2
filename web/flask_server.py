@@ -1,32 +1,31 @@
-#!/usr/local/bin/python2.7
 # -*- coding: utf-8 -*-
 
 import datetime
-import flask
 import os
 import zipfile
 import glob
+from subprocess import Popen, PIPE
+import flask
 from flask import request
-from login import flask_login, login_manager, login, logout, protected
-#from multiprocessing.dummy import Pool as ThreadPool
 from osgeo import ogr
 from sentinelsat import SentinelAPI
-# from shutil import rmtree
-from subprocess import call, Popen, PIPE
-#from timeit import time
+from login import flask_login, login_manager, login, logout, protected
 
 ROOTDIR = '/Users/carlo/sentinel2-master/sets/'
-
 # ROOTDIR = '/mnt/raid51/imagery/sentinel/web_served/original'
 # ROOTDIR = 'F:/'
-# PROJDIR = os.path.join(ROOTDIR, 'Tongoy_Musels'); ZIPDIR = os.path.join(PROJDIR, 'zip'); L1DIR = os.path.join(PROJDIR, 'l1')
-# L2DIR = os.path.join(PROJDIR, 'l2'); TIFDIR = os.path.join(PROJDIR, 'l2_tif')
+# PROJDIR = os.path.join(ROOTDIR, 'Tongoy_Musels')
+# ZIPDIR = os.path.join(PROJDIR, 'zip')
+#  L1DIR = os.path.join(PROJDIR, 'l1')
+# L2DIR = os.path.join(PROJDIR, 'l2')
+# TIFDIR = os.path.join(PROJDIR, 'l2_tif')
 PROJDIR = None
 ZIPDIR = None
 L1DIR = None
 L2DIR = None
 TIFDIR = None
-DIRS = ['zip', 'l1', 'l2', 'l2_tif']  # the order is important! do not move without check!
+DIRS = ['zip', 'l1', 'l2', 'l2_tif']
+# the order is important! do not move without check!
 
 @flask_login.login_required
 def inicio():
@@ -44,7 +43,7 @@ def inicio():
         # Setting square of interest, based on 4 coordinates
         line = ogr.Geometry(ogr.wkbLinearRing)
         poly = ogr.Geometry(ogr.wkbPolygon)
-        coord = zip([pac['west']]*2 + [pac['east']]*2, [pac['north'], pac['south']] + [pac['south'], pac['north']])
+        coord = list(zip([pac['west']]*2 + [pac['east']]*2, [pac['north'], pac['south']] + [pac['south'], pac['north']]))
         coord.append(coord[0])
         for i in coord:
             line.AddPoint(float(i[0]), float(i[1]))
@@ -53,7 +52,7 @@ def inicio():
         # Setting api, query, and download
         api = SentinelAPI('aparedes', 'N1E3I3ipjdm5FEV8oaQN', 'https://scihub.copernicus.eu/dhus')
         filesd = {}; failed = {}
-        date=(''.join(pac['start_date'].split("-")), ''.join(pac['end_date'].split("-")))
+        date = (''.join(pac['start_date'].split("-")), ''.join(pac['end_date'].split("-")))
         products = api.query(poly.ExportToWkt(),
                              date,
                              platformname='Sentinel-2',
@@ -61,9 +60,9 @@ def inicio():
                              producttype='S2MSI1C') #lv1 sale en el dia, lv2 sale como postproceso, 48 hrs dpues
         productos = []
         ids = []
-        down_size = sum([float(v['size'].split(' ')[0]) for k, v in products.iteritems()])
-        productos.append([(v['filename']) for k, v in products.iteritems()])
-        ids.append([(k) for k, v in products.iteritems()])
+        down_size = sum([float(v['size'].split(' ')[0]) for k, v in products.items()])
+        productos.append([(v['filename']) for k, v in products.items()])
+        ids.append([(k) for k, v in products.items()])
         filesd, triggered, failed = api.download_all(products, directory_path=os.path.join(fullpath, DIRS[0]))
         return 'Se descargaron {} productos, de {}MB en total.'.format(len(products), down_size)
     else:
@@ -89,12 +88,12 @@ def projects():
                 os.makedirs(os.path.join(PROJDIR, sdir))
         l1zips = [f for f in os.listdir(ZIPDIR) if (f.endswith('zip') and not (os.path.isdir(f)))] # S2?_MSIL1C*.SAFE
         l2dirs = [f for f in os.listdir(L2DIR)] # S2?_MSIL1C*.SAFE
-        print l2dirs
+        print(l2dirs)
         if not l1zips: # if no files in zip folder, check l1 folder for SAFE dirs
             l1zips = [f for f in os.listdir(L1DIR) if f.endswith('SAFE')]
         return flask.render_template('sentinel_projects.html', projs=l1zips, type=2)
     else:
-        projs = [d for d in os.walk(ROOTDIR).next()[1] if d[0] not in ['.', '$']]
+        projs = [d for d in os.walk(ROOTDIR).__next__()[1] if d[0] not in ['.', '$']]
         return flask.render_template('sentinel_projects.html', projs=projs, type=1)
 
 
@@ -128,11 +127,11 @@ def process_project():
     # results = pool.map(L1toTif, marray)
     #----- Single trhead:
     for l1folder in l1folders:
-        proyecto=os.path.join(L1DIR, l1folder)
+        proyecto = os.path.join(L1DIR, l1folder)
         #/blabla/sets/demo/l1/S2A_blablabla.SAFE
-        l2=L2DIR
+        l2 = L2DIR
         #/blabla/sets/demo/l2
-        tif=TIFDIR
+        tif = TIFDIR
         #/blabla/sets/demo/l2_tif
         logger='{}.log'.format(os.path.join(PROJDIR, os.path.basename(l1folder))),
         if 'toTiff' in pac:
@@ -154,7 +153,7 @@ def download_view():
         downweb = '<p>{3} -<a href="/products/{0}/{1}/{2}"> {2}</a></p>'
         return header + ''.join([downweb.format(selected_dir, DIRS[3], i, ctr) for ctr, i in enumerate(files)])
     else:
-        projs = [d for d in os.walk(ROOTDIR).next()[1] if d[0] not in ['.', '$']]
+        projs = [d for d in os.walk(ROOTDIR).__next__()[1] if d[0] not in ['.', '$']]
         return flask.render_template('sentinel_projects.html', projs=projs, type=1)
 
 @flask_login.login_required
@@ -197,8 +196,8 @@ def L1toL2(path, logfile=None):
     level = dir_elems[1]
     date_time = dir_elems[2]
 
-    path2 = parent_dir.replace("/l1","/l2")
-    level = level.replace("MSIL1C","MSIL2A")
+    path2 = parent_dir.replace("/l1", "/l2")
+    level = level.replace("MSIL1C", "MSIL2A")
 
     path_tif = path2 + '/' + sentinel + '_' + level + '_' + date_time
     cmd = ["L2A_Process",  "--resolution=10", path, "--output_dir", path2]
@@ -209,7 +208,7 @@ def L1toL2(path, logfile=None):
     if logfile:
         with p.stdout, open(logfile, 'ab') as file:
             for line in iter(p.stdout.readline, b''):
-                print line,
+                print(line),
                 file.write(line)
 
     #no pude replicar el error que trataba de evitar el while true, asi que lo saque
@@ -219,7 +218,7 @@ def L1toL2(path, logfile=None):
 def L2toTif(pathlist, outpath=None, resolutions=[10, 20], allinfo=True, logfile=None):
     # path = '/mnt/raid51/imagery/sentinel/web_served/original/tongoy/l2/S2B_MSIL2A_20180611T144729_N0206_R139_T19JBG_20180611T195539.SAFE/'
     # path = '/mnt/raid51/imagery/sentinel/web_served/original/tongoy/l2/S2B_MSIL2A_20180611T144729_N0206_R139_T19JBG_20180611T195539.SAFE/GRANULE/L2A_T19JBG_A006600_20180611T145550/IMG_DATA/R10m'
-    print 'L2 A TIFF!',
+    print('L2 A TIFF!',)
     path_to_conv = glob.glob(pathlist + '*')
     path = path_to_conv[0]
     granule = os.path.join(path, 'GRANULE')
@@ -229,6 +228,7 @@ def L2toTif(pathlist, outpath=None, resolutions=[10, 20], allinfo=True, logfile=
     pbands = ['B02', 'B03', 'B04', 'B05', 'B06', 'B07', 'B08', 'B8A', 'B11', 'B12']
     sbands = ['AOT', 'SCL', 'TCI', 'WVP']
     stack = 'stack.vrt'
+    ans = []
     if outpath is None:
         outp = os.path.join(granule, imdir)
     else:
@@ -241,7 +241,7 @@ def L2toTif(pathlist, outpath=None, resolutions=[10, 20], allinfo=True, logfile=
         fullname = os.path.join(outp, imname)
         if allinfo:
             files += [b for w in sbands for b in bands if w in b]
-        
+
         print('Creando imagen GTiff: {}'.format(fullname))
 
         # el vrt..
@@ -250,7 +250,7 @@ def L2toTif(pathlist, outpath=None, resolutions=[10, 20], allinfo=True, logfile=
         if logfile:
             with p.stdout, open(logfile, 'ab') as file:
                 for line in iter(p.stdout.readline, b''):
-                    print line,
+                    print(line),
                     file.write(line)
         # output, error = p.communicate()
 
@@ -260,20 +260,21 @@ def L2toTif(pathlist, outpath=None, resolutions=[10, 20], allinfo=True, logfile=
         if logfile:
             with p2.stdout, open(logfile, 'ab') as file:
                 for line in iter(p2.stdout.readline, b''):
-                    print line,
+                    print(line),
                     file.write(line)
-    return 0
+        ans.append(fullname)
+    return ans
 
 
 def L1toTif(l1dir, l2dir=None, tifdir=None, logfile=None):
-    print 'L1 a TIFF!',
+    print('L1 a TIFF!',)
     if isinstance(l1dir, list): # for multithread solution!
         olist = l1dir
         l1dir = olist[0]
         l2dir = olist[1]
         tifdir = olist[2]
         logfile = olist[3]
-    if l2dir is None or tifdir is None: 
+    if l2dir is None or tifdir is None:
         raise Exception("l2dir y tifdir no pueden ser None: llamada hecha desde L1toTif, on {}".format(l1dir))
     print("Leyendo {}".format(l1dir))
 
@@ -294,7 +295,6 @@ def before_request():
 
 
 if __name__ == '__main__':
-    for key, data in routes.iteritems():
+    for key, data in routes.items():
         app.add_url_rule(key, view_func=data['func'], methods=data['method'])
     app.run(host='127.0.0.1', debug=True, port=5000, threaded=True)
-
