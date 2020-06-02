@@ -12,13 +12,7 @@ from sentinelsat import SentinelAPI
 from login import flask_login, login_manager, login, logout, protected
 
 ROOTDIR = '/Users/carlo/sentinel2-master/sets/'
-# ROOTDIR = '/mnt/raid51/imagery/sentinel/web_served/original'
-# ROOTDIR = 'F:/'
-# PROJDIR = os.path.join(ROOTDIR, 'Tongoy_Musels')
-# ZIPDIR = os.path.join(PROJDIR, 'zip')
-#  L1DIR = os.path.join(PROJDIR, 'l1')
-# L2DIR = os.path.join(PROJDIR, 'l2')
-# TIFDIR = os.path.join(PROJDIR, 'l2_tif')
+
 PROJDIR = None
 ZIPDIR = None
 L1DIR = None
@@ -210,8 +204,6 @@ def L1toL2(path, logfile=None):
             for line in iter(p.stdout.readline, b''):
                 print(line),
                 file.write(line)
-
-    #no pude replicar el error que trataba de evitar el while true, asi que lo saque
     return path_tif
 
 
@@ -252,7 +244,6 @@ def L2toTif(pathlist, outpath=None, resolutions=[10, 20], allinfo=True, logfile=
                 for line in iter(p.stdout.readline, b''):
                     print(line),
                     file.write(line)
-        # output, error = p.communicate()
 
         # a Gtiff..
         cmd2 = ['gdal_translate', '-co', 'COMPRESS=LZW', '-of', 'GTiff', '-co', 'predictor=2', stackpath, fullname]
@@ -289,7 +280,7 @@ def before_request():
     # This will keep a session alive for an x amount of inactive time. Every time the website is used, the countdown
     # is restarted
     flask.session.permanent = True
-    app.permanent_session_lifetime = datetime.timedelta(minutes=60*48) #falta probar si depende de timeit o datetime
+    app.permanent_session_lifetime = datetime.timedelta(minutes=60*48)
     flask.session.modified = True
     flask.g.user = flask_login.current_user
 
